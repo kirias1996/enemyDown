@@ -3,12 +3,15 @@ package plugin.enemyDown.command;
 import java.util.List;
 import java.util.SplittableRandom;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 public class EnemyDownCommand implements CommandExecutor {
 
@@ -17,12 +20,28 @@ public class EnemyDownCommand implements CommandExecutor {
     if (sender instanceof Player player) {
       World world = player.getWorld();
 
-      player.setHealth(20);
-      player.setFoodLevel(20);
+      initPlayerStatus(player);
 
       world.spawnEntity(getEnemySpawnLocation(player, world), getEnemy());
     }
     return false;
+  }
+
+  /**
+   * ゲーム開始前にプレイヤーの初期状態を設定する 体力と空腹度を最大にして、初期装備をダイヤモンドに設定する
+   *
+   * @param player コマンドを実行したプレイヤー
+   */
+  private static void initPlayerStatus(Player player) {
+    player.setHealth(20);
+    player.setFoodLevel(20);
+
+    PlayerInventory playerInventory = player.getInventory();
+    playerInventory.setHelmet(new ItemStack(Material.DIAMOND_HELMET));
+    playerInventory.setChestplate(new ItemStack(Material.DIAMOND_CHESTPLATE));
+    playerInventory.setLeggings(new ItemStack(Material.DIAMOND_LEGGINGS));
+    playerInventory.setBoots(new ItemStack(Material.DIAMOND_BOOTS));
+    playerInventory.setItemInMainHand(new ItemStack((Material.DIAMOND_SWORD)));
   }
 
 
@@ -51,7 +70,7 @@ public class EnemyDownCommand implements CommandExecutor {
    * @return　敵
    */
   private EntityType getEnemy() {
-    List<EntityType> enemyList = List.of(EntityType.ZOMBIE, EntityType.SPIDER, EntityType.SKELETON, EntityType.CREEPER);
+    List<EntityType> enemyList = List.of(EntityType.ZOMBIE, EntityType.SPIDER, EntityType.SKELETON, EntityType.ZOMBIE_VILLAGER);
     int random = new SplittableRandom().nextInt(4);
     return enemyList.get(random);
   }
