@@ -1,6 +1,7 @@
 package plugin.enemyDown.command;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.SplittableRandom;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -10,15 +11,22 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-public class EnemyDownCommand implements CommandExecutor {
+public class EnemyDownCommand implements CommandExecutor, Listener {
+
+  Player player;
+  private int score;
 
   @Override
   public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
     if (sender instanceof Player player) {
       World world = player.getWorld();
+      this.player = player;
 
       initPlayerStatus(player);
 
@@ -26,6 +34,25 @@ public class EnemyDownCommand implements CommandExecutor {
     }
     return false;
   }
+
+  @EventHandler
+  public void enemyDeathEvent(EntityDeathEvent e) {
+    Player player = e.getEntity().getKiller();
+
+    if (Objects.isNull(this.player)) {
+      return;
+    }
+
+    if (Objects.isNull(player)) {
+      return;
+    }
+    if (this.player.getName().equals(player.getName())) {
+      score += 10;
+      player.sendMessage("敵を倒しました。現在のスコアは" + score + "点です。");
+    }
+
+  }
+
 
   /**
    * ゲーム開始前にプレイヤーの初期状態を設定する 体力と空腹度を最大にして、初期装備をダイヤモンドに設定する
