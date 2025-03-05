@@ -28,15 +28,20 @@ public class EnemyDownCommand implements CommandExecutor, Listener {
     if (sender instanceof Player player) {
 
       if (playerScoreList.isEmpty()) {
-        addNewPlayer(player);
+        addPlayer(createPlayer(player));
       } else {
+        PlayerScore tempPlayerScore = null;
+        boolean isAddPlayer = false;
         for (PlayerScore playerScore : playerScoreList) {
           //リストにコマンドを実行したプレイヤーが入っていない場合
-          if (!playerScoreList.contains(player.getName())) {
-            addNewPlayer(player);
+          if (!playerScore.getPlayerName().equals(player.getName())) {
+            tempPlayerScore = createPlayer(player);
+            isAddPlayer = true;
           }
         }
-
+        if (isAddPlayer) {
+          addPlayer(tempPlayerScore);
+        }
       }
 
       World world = player.getWorld();
@@ -49,13 +54,22 @@ public class EnemyDownCommand implements CommandExecutor, Listener {
   }
 
   /**
-   * 　プレイヤーのスコア情報をリストに格納する
+   * 　プレイヤーのスコア情報を作成する
    *
    * @param player コマンドを実行したプレイヤー
    */
-  private void addNewPlayer(Player player) {
+  private PlayerScore createPlayer(Player player) {
     PlayerScore playerScore = new PlayerScore();
     playerScore.setPlayerName(player.getName());
+    return playerScore;
+  }
+
+  /**
+   * 　プレイヤーのスコア情報をリストに追加する
+   *
+   * @param player コマンドを実行したプレイヤー
+   */
+  private void addPlayer(PlayerScore playerScore) {
     playerScoreList.add(playerScore);
   }
 
