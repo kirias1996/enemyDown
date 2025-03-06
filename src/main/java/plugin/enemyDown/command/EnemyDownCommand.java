@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.SplittableRandom;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -17,16 +18,23 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import plugin.enemyDown.Main;
 import plugin.enemyDown.data.PlayerScore;
 
 public class EnemyDownCommand implements CommandExecutor, Listener {
 
   private List<PlayerScore> playerScoreList = new ArrayList<>();
+  private Main main;
+  private int gameTime = 20;
+  private final int initialGameTime = 20;
+
+  public EnemyDownCommand(Main main) {
+    this.main = main;
+  }
 
   @Override
   public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
     if (sender instanceof Player player) {
-
       if (playerScoreList.isEmpty()) {
         addPlayer(createPlayer(player));
       } else {
@@ -44,11 +52,20 @@ public class EnemyDownCommand implements CommandExecutor, Listener {
         }
       }
 
+      gameTime = initialGameTime;
       World world = player.getWorld();
 
       initPlayerStatus(player);
+      Bukkit.getScheduler().runTaskTimer(main, Runnable -> {
+        if (gameTime <= 0) {
+          Runnable.cancel();
+          player.sendMessage("ゲームが終了しました。");
+          return;
+        }
+        world.spawnEntity(getEnemySpawnLocation(player, world), getEnemy());
+        gameTime -= 5;
+      }, 0, 5 * 20);
 
-      world.spawnEntity(getEnemySpawnLocation(player, world), getEnemy());
     }
     return false;
   }
