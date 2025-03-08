@@ -25,8 +25,8 @@ public class EnemyDownCommand implements CommandExecutor, Listener {
 
   private List<PlayerScore> playerScoreList = new ArrayList<>();
   private Main main;
-  private int gameTime = 20;
   private final int initialGameTime = 20;
+  private int gameTime;
 
   public EnemyDownCommand(Main main) {
     this.main = main;
@@ -35,20 +35,17 @@ public class EnemyDownCommand implements CommandExecutor, Listener {
   @Override
   public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
     if (sender instanceof Player player) {
+      // コマンド実行プレイヤーを PlayerScoreとして格納する
+      PlayerScore commandExecutorPlayer = new PlayerScore(player.getName());
       if (playerScoreList.isEmpty()) {
         addPlayer(createPlayer(player));
       } else {
-        PlayerScore tempPlayerScore = null;
-        boolean isAddPlayer = false;
-        for (PlayerScore playerScore : playerScoreList) {
-          //リストにコマンドを実行したプレイヤーが入っていない場合
-          if (!playerScore.getPlayerName().equals(player.getName())) {
-            tempPlayerScore = createPlayer(player);
-            isAddPlayer = true;
-          }
-        }
-        if (isAddPlayer) {
-          addPlayer(tempPlayerScore);
+        if (!playerScoreList.contains(commandExecutorPlayer)) {
+          addPlayer(createPlayer(player));
+          player.sendMessage("新規プレイヤーが作成されました。");
+        } else {
+          player.sendMessage("プレイヤー作成済みです。");
+          // プレイや情報を返す処理を記載予定(未実装)
         }
       }
 
