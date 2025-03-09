@@ -12,17 +12,12 @@
       <change beforePath="$PROJECT_DIR$/.gradle/8.8/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.8/fileHashes/fileHashes.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.8/fileHashes/resourceHashesCache.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.8/fileHashes/resourceHashesCache.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/file-system.probe" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/file-system.probe" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/EnemyDown.main.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules/EnemyDown.main.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/classes/java/main/plugin/enemyDown/command/EnemyDownCommand.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/plugin/enemyDown/command/EnemyDownCommand.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/classes/java/main/plugin/enemyDown/data/PlayerScore.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/plugin/enemyDown/data/PlayerScore.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/libs/EnemyDown-1.0-SNAPSHOT.jar" beforeDir="false" afterPath="$PROJECT_DIR$/build/libs/EnemyDown-1.0-SNAPSHOT.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/tmp/compileJava/compileTransaction/stash-dir/EnemyDownCommand.class.uniqueId0" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/tmp/compileJava/compileTransaction/stash-dir/EnemyDownCommand.class.uniqueId1" beforeDir="false" afterPath="$PROJECT_DIR$/build/tmp/compileJava/compileTransaction/stash-dir/EnemyDownCommand.class.uniqueId1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/tmp/compileJava/compileTransaction/stash-dir/PlayerScore.class.uniqueId0" beforeDir="false" afterPath="$PROJECT_DIR$/build/tmp/compileJava/compileTransaction/stash-dir/PlayerScore.class.uniqueId0" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/tmp/compileJava/previous-compilation-data.bin" beforeDir="false" afterPath="$PROJECT_DIR$/build/tmp/compileJava/previous-compilation-data.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/plugin/enemyDown/command/EnemyDownCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/plugin/enemyDown/command/EnemyDownCommand.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/plugin/enemyDown/data/PlayerScore.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/plugin/enemyDown/data/PlayerScore.java" afterDir="false" />
@@ -98,25 +93,26 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Gradle.Build EnemyDown.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.D:/Java/EnemyDown [wrapper].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.EnemyDown [jar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.EnemyDown のビルド.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.EnemyDown.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;feature&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/Java/EnemyDown&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.updates&quot;,
-    &quot;リモート JVM デバッグ.EnemyDown.executor&quot;: &quot;Debug&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Gradle.Build EnemyDown.executor": "Run",
+    "Gradle.D:/Java/EnemyDown [wrapper].executor": "Run",
+    "Gradle.Download Sources.executor": "Run",
+    "Gradle.EnemyDown [jar].executor": "Run",
+    "Gradle.EnemyDown のビルド.executor": "Run",
+    "Gradle.EnemyDown.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "feature",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/Java/EnemyDown",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "reference.settings.project.maven.importing",
+    "リモート JVM デバッグ.EnemyDown.executor": "Debug"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CreateClassDialog.RecentsKey">
       <recent name="plugin.enemyDown.command" />

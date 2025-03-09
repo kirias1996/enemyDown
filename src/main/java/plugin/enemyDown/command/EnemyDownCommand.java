@@ -26,7 +26,7 @@ public class EnemyDownCommand implements CommandExecutor, Listener {
   private List<PlayerScore> playerScoreList = new ArrayList<>();
   private Main main;
   private final int initialGameTime = 20;
-  private int gameTime;
+
 
   public EnemyDownCommand(Main main) {
     this.main = main;
@@ -36,31 +36,20 @@ public class EnemyDownCommand implements CommandExecutor, Listener {
   public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
     if (sender instanceof Player player) {
       // コマンド実行プレイヤーを PlayerScoreとして格納する
-      PlayerScore commandExecutorPlayer = new PlayerScore(player.getName());
-      if (playerScoreList.isEmpty()) {
-        addPlayer(createPlayer(player));
-      } else {
-        if (!playerScoreList.contains(commandExecutorPlayer)) {
-          addPlayer(createPlayer(player));
-          player.sendMessage("新規プレイヤーが作成されました。");
-        } else {
-          player.sendMessage("プレイヤー作成済みです。");
-          // プレイや情報を返す処理を記載予定(未実装)
-        }
-      }
+      PlayerScore commandExecutorPlayer = getPlayerScore(player);
 
-      gameTime = initialGameTime;
+      commandExecutorPlayer.setGameTime(initialGameTime);
       World world = player.getWorld();
 
       initPlayerStatus(player);
       Bukkit.getScheduler().runTaskTimer(main, Runnable -> {
-        if (gameTime <= 0) {
+        if (commandExecutorPlayer.getGameTime() <= 0) {
           Runnable.cancel();
           player.sendMessage("ゲームが終了しました。");
           return;
         }
         world.spawnEntity(getEnemySpawnLocation(player, world), getEnemy());
-        gameTime -= 5;
+        commandExecutorPlayer.setGameTime(commandExecutorPlayer.getGameTime() - 5);
       }, 0, 5 * 20);
 
     }
@@ -68,23 +57,35 @@ public class EnemyDownCommand implements CommandExecutor, Listener {
   }
 
   /**
+   * リストが空 or コマンドを実行したプレイヤーがリストに存在しない場合、プレイヤースコア情報をを新規作成。
+   * コマンドを実行したプレイヤーが既にリストに存在する場合、コマンドを実行したプレイヤースコア情報を返す
+   *
+   * @param player コマンドを実行したプレイヤー
+   * @return　コマンドを実行したプレイヤースコア情報
+   */
+  private PlayerScore getPlayerScore(Player player) {
+    PlayerScore commandExecutorPlayer = new PlayerScore(player.getName());
+    if (playerScoreList.isEmpty()) {
+      return addPlayerList(player);
+    } else {
+      if (!playerScoreList.contains(commandExecutorPlayer)) {
+        return addPlayerList(player);
+      } else {
+        return commandExecutorPlayer;
+      }
+    }
+  }
+
+  /**
    * 　プレイヤーのスコア情報を作成する
    *
    * @param player コマンドを実行したプレイヤー
    */
-  private PlayerScore createPlayer(Player player) {
+  private PlayerScore addPlayerList(Player player) {
     PlayerScore playerScore = new PlayerScore();
     playerScore.setPlayerName(player.getName());
-    return playerScore;
-  }
-
-  /**
-   * 　プレイヤーのスコア情報をリストに追加する
-   *
-   * @param player コマンドを実行したプレイヤー
-   */
-  private void addPlayer(PlayerScore playerScore) {
     playerScoreList.add(playerScore);
+    return playerScore;
   }
 
   @EventHandler
