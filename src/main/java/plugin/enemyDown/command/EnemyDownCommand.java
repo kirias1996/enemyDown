@@ -1,9 +1,12 @@
 package plugin.enemyDown.command;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.SplittableRandom;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -26,8 +29,7 @@ public class EnemyDownCommand implements CommandExecutor, Listener {
   private List<PlayerScore> playerScoreList = new ArrayList<>();
   private Main main;
   private final int initialGameTime = 20;
-
-
+  
   public EnemyDownCommand(Main main) {
     this.main = main;
   }
@@ -45,7 +47,11 @@ public class EnemyDownCommand implements CommandExecutor, Listener {
       Bukkit.getScheduler().runTaskTimer(main, Runnable -> {
         if (commandExecutorPlayer.getGameTime() <= 0) {
           Runnable.cancel();
-          player.sendMessage("ゲームが終了しました。");
+          Title title = Title.title(Component.text("ゲームが終了しました。"),
+              Component.text(commandExecutorPlayer.getPlayerName() + "の合計点数は" + commandExecutorPlayer.getScore() + "点!"),
+              Title.Times.times(Duration.ofMillis(0), Duration.ofMillis(1000), Duration.ofMillis(0)));
+          world.showTitle(title);
+          commandExecutorPlayer.setScore(0);
           return;
         }
         world.spawnEntity(getEnemySpawnLocation(player, world), getEnemy());
@@ -68,10 +74,12 @@ public class EnemyDownCommand implements CommandExecutor, Listener {
     if (playerScoreList.isEmpty()) {
       return addPlayerList(player);
     } else {
-      if (!playerScoreList.contains(commandExecutorPlayer)) {
+      int index = playerScoreList.indexOf(commandExecutorPlayer);
+      // リストにプレイヤーが存在しない時
+      if (index == -1) {
         return addPlayerList(player);
       } else {
-        return commandExecutorPlayer;
+        return playerScoreList.get(index);
       }
     }
   }
@@ -104,7 +112,6 @@ public class EnemyDownCommand implements CommandExecutor, Listener {
     }
   }
 
-
   /**
    * ゲーム開始前にプレイヤーの初期状態を設定する 体力と空腹度を最大にして、初期装備をダイヤモンドに設定する
    *
@@ -121,7 +128,6 @@ public class EnemyDownCommand implements CommandExecutor, Listener {
     playerInventory.setBoots(new ItemStack(Material.DIAMOND_BOOTS));
     playerInventory.setItemInMainHand(new ItemStack((Material.DIAMOND_SWORD)));
   }
-
 
   /**
    * 敵の出現エリアを取得します。 出現エリアはX軸とZ軸は自分の一からプラス,ランダムで-10~9の値が設定されます。 出現エリアはY軸はプレイヤーと同じ位置になります。
