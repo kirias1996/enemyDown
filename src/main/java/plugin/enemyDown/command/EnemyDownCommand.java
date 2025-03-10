@@ -15,6 +15,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -29,7 +30,7 @@ public class EnemyDownCommand implements CommandExecutor, Listener {
   private List<PlayerScore> playerScoreList = new ArrayList<>();
   private Main main;
   private final int initialGameTime = 20;
-  
+
   public EnemyDownCommand(Main main) {
     this.main = main;
   }
@@ -98,7 +99,8 @@ public class EnemyDownCommand implements CommandExecutor, Listener {
 
   @EventHandler
   public void enemyDeathEvent(EntityDeathEvent e) {
-    Player player = e.getEntity().getKiller();
+    LivingEntity enemy = e.getEntity();
+    Player player = enemy.getKiller();
 
     if (playerScoreList.isEmpty() || Objects.isNull(player)) {
       return;
@@ -106,10 +108,28 @@ public class EnemyDownCommand implements CommandExecutor, Listener {
 
     for (PlayerScore playerScore : playerScoreList) {
       if (playerScore.getPlayerName().equals(player.getName())) {
-        playerScore.setScore(playerScore.getScore() + 10);
+        int enemyDestroyScore = getEnemyDestroyScore(enemy);
+        playerScore.setScore(playerScore.getScore() + enemyDestroyScore);
         player.sendMessage("敵を倒しました。現在のスコアは" + playerScore.getScore() + "点です。");
       }
     }
+  }
+
+  /**
+   * 敵の種類に応じて取得するスコアを設定
+   *
+   * @param enemy 敵
+   * @return 取得する点数
+   */
+  private int getEnemyDestroyScore(LivingEntity enemy) {
+    int enemyDestroyScore;
+    switch (enemy.getType()) {
+      case ZOMBIE, ZOMBIE_VILLAGER -> enemyDestroyScore = 10;
+      case SPIDER -> enemyDestroyScore = 20;
+      case SKELETON -> enemyDestroyScore = 30;
+      default -> enemyDestroyScore = 0;
+    }
+    return enemyDestroyScore;
   }
 
   /**
@@ -117,7 +137,7 @@ public class EnemyDownCommand implements CommandExecutor, Listener {
    *
    * @param player コマンドを実行したプレイヤー
    */
-  private static void initPlayerStatus(Player player) {
+  private void initPlayerStatus(Player player) {
     player.setHealth(20);
     player.setFoodLevel(20);
 
@@ -138,9 +158,10 @@ public class EnemyDownCommand implements CommandExecutor, Listener {
    */
   private Location getEnemySpawnLocation(Player player, World world) {
     Location playerLocation = player.getLocation();
-    int randomX = new SplittableRandom().nextInt(20) - 10;
-    int randomZ = new SplittableRandom().nextInt(20) - 10;
-
+//    int randomX = new SplittableRandom().nextInt(20) - 10;
+//    int randomZ = new SplittableRandom().nextInt(20) - 10;
+    int randomX = new SplittableRandom().nextInt(10) - 5;
+    int randomZ = new SplittableRandom().nextInt(10) - 5;
     double x = playerLocation.getX() + randomX;
     double y = playerLocation.getY();
     double z = playerLocation.getZ() + randomZ;
@@ -155,7 +176,7 @@ public class EnemyDownCommand implements CommandExecutor, Listener {
    */
   private EntityType getEnemy() {
     List<EntityType> enemyList = List.of(EntityType.ZOMBIE, EntityType.SPIDER, EntityType.SKELETON, EntityType.ZOMBIE_VILLAGER);
-    int random = new SplittableRandom().nextInt(4);
+    int random = new SplittableRandom().nextInt(enemyList.size());
     return enemyList.get(random);
   }
 }
