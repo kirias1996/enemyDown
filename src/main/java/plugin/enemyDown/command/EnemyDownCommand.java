@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.SplittableRandom;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
+import net.kyori.adventure.title.Title.Times;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -14,6 +15,7 @@ import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -50,8 +52,14 @@ public class EnemyDownCommand implements CommandExecutor, Listener {
           Runnable.cancel();
           Title title = Title.title(Component.text("ゲームが終了しました。"),
               Component.text(commandExecutorPlayer.getPlayerName() + "の合計点数は" + commandExecutorPlayer.getScore() + "点!"),
-              Title.Times.times(Duration.ofMillis(0), Duration.ofMillis(1000), Duration.ofMillis(0)));
+              Times.times(Duration.ofMillis(0), Duration.ofMillis(3000), Duration.ofMillis(0)));
           world.showTitle(title);
+          List<Entity> enemies = player.getNearbyEntities(30, 0, 30);
+          for (Entity enemy : enemies) {
+            switch (enemy.getType()) {
+              case ZOMBIE, ZOMBIE_VILLAGER, SKELETON, SPIDER -> enemy.remove();
+            }
+          }
           commandExecutorPlayer.setScore(0);
           return;
         }
