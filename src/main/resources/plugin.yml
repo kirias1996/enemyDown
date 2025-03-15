@@ -6,3 +6,4 @@ commands:
   enemyDown:
     description: "ゲーム開始コマンド"
     usage: /enemyDown
+  enemySpawn:
