@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.SplittableRandom;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
@@ -12,8 +13,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -27,47 +26,36 @@ import org.bukkit.inventory.PlayerInventory;
 import plugin.enemyDown.Main;
 import plugin.enemyDown.data.PlayerScore;
 
-public class EnemyDownCommand implements CommandExecutor, Listener {
+/**
+ * 制限時間内にランダムで出現する敵を倒し、スコアを獲得するゲームを起動するコマンドです。
+ * 敵の種類に応じて加算されるスコアが変わり、倒せた敵の合計によってスコアが変動します。
+ * 結果はプレイヤー名、点数、日時などで保存されます。
+ */
+public class EnemyDownCommand extends BaseCommand implements Listener {
 
   private List<PlayerScore> playerScoreList = new ArrayList<>();
   private Main main;
-  private final int initialGameTime = 20;
+  private final int INITIAL_GAME_TIME = 20;
 
   public EnemyDownCommand(Main main) {
     this.main = main;
   }
 
   @Override
-  public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-    if (sender instanceof Player player) {
-      // コマンド実行プレイヤーを PlayerScoreとして格納する
-      PlayerScore commandExecutorPlayer = getPlayerScore(player);
+  public boolean onExecutePlayerCommand(Player player) {
+    // コマンド実行プレイヤーを PlayerScoreとして格納する
+    PlayerScore commandExecutorPlayer = getPlayerScore(player);
 
-      commandExecutorPlayer.setGameTime(initialGameTime);
-      World world = player.getWorld();
+    commandExecutorPlayer.setGameTime(INITIAL_GAME_TIME);
+    initPlayerStatus(player);
 
-      initPlayerStatus(player);
-      Bukkit.getScheduler().runTaskTimer(main, Runnable -> {
-        if (commandExecutorPlayer.getGameTime() <= 0) {
-          Runnable.cancel();
-          Title title = Title.title(Component.text("ゲームが終了しました。"),
-              Component.text(commandExecutorPlayer.getPlayerName() + "の合計点数は" + commandExecutorPlayer.getScore() + "点!"),
-              Times.times(Duration.ofMillis(0), Duration.ofMillis(3000), Duration.ofMillis(0)));
-          world.showTitle(title);
-          List<Entity> enemies = player.getNearbyEntities(30, 0, 30);
-          for (Entity enemy : enemies) {
-            switch (enemy.getType()) {
-              case ZOMBIE, ZOMBIE_VILLAGER, SKELETON, SPIDER -> enemy.remove();
-            }
-          }
-          commandExecutorPlayer.setScore(0);
-          return;
-        }
-        world.spawnEntity(getEnemySpawnLocation(player, world), getEnemy());
-        commandExecutorPlayer.setGameTime(commandExecutorPlayer.getGameTime() - 5);
-      }, 0, 5 * 20);
+    gamePlay(player, commandExecutorPlayer, player.getWorld());
+    return false;
+  }
 
-    }
+
+  @Override
+  public boolean onExecuteNPCCommand(CommandSender sender) {
     return false;
   }
 
@@ -79,18 +67,15 @@ public class EnemyDownCommand implements CommandExecutor, Listener {
    * @return　コマンドを実行したプレイヤースコア情報
    */
   private PlayerScore getPlayerScore(Player player) {
-    PlayerScore commandExecutorPlayer = new PlayerScore(player.getName());
-    if (playerScoreList.isEmpty()) {
-      return addPlayerList(player);
-    } else {
-      int index = playerScoreList.indexOf(commandExecutorPlayer);
-      // リストにプレイヤーが存在しない時
-      if (index == -1) {
-        return addPlayerList(player);
-      } else {
-        return playerScoreList.get(index);
-      }
-    }
+    Optional<PlayerScore> foundPlayer = playerScoreList.stream()
+        .filter(n -> n.equals(new PlayerScore(player.getName())))
+        .findFirst();
+    /*
+       StreamAPIで取得した要素が空のとき → プレイヤースコア情報を新規作成
+       プレイヤースコア情報が取得できた時→リストのプレイヤースコア情報を返す
+     */
+    return foundPlayer.orElseGet(() -> addPlayerList(player));
+
   }
 
   /**
@@ -99,8 +84,7 @@ public class EnemyDownCommand implements CommandExecutor, Listener {
    * @param player コマンドを実行したプレイヤー
    */
   private PlayerScore addPlayerList(Player player) {
-    PlayerScore playerScore = new PlayerScore();
-    playerScore.setPlayerName(player.getName());
+    PlayerScore playerScore = new PlayerScore(player.getName());
     playerScoreList.add(playerScore);
     return playerScore;
   }
@@ -155,6 +139,35 @@ public class EnemyDownCommand implements CommandExecutor, Listener {
     playerInventory.setLeggings(new ItemStack(Material.DIAMOND_LEGGINGS));
     playerInventory.setBoots(new ItemStack(Material.DIAMOND_BOOTS));
     playerInventory.setItemInMainHand(new ItemStack((Material.DIAMOND_SWORD)));
+  }
+
+  /**
+   * ゲームを開始し、制限時間内に敵を倒すとスコアが加算されます。合計スコアを加算します。
+   *
+   * @param player                プレイヤー
+   * @param commandExecutorPlayer コマンド実行プレイヤー
+   * @param world                 　MineCraftのワールド情報
+   */
+  private void gamePlay(Player player, PlayerScore commandExecutorPlayer, World world) {
+    Bukkit.getScheduler().runTaskTimer(main, Runnable -> {
+      if (commandExecutorPlayer.getGameTime() <= 0) {
+        Runnable.cancel();
+        Title title = Title.title(Component.text("ゲームが終了しました。"),
+            Component.text(commandExecutorPlayer.getPlayerName() + "の合計点数は" + commandExecutorPlayer.getScore() + "点!"),
+            Times.times(Duration.ofMillis(0), Duration.ofMillis(3000), Duration.ofMillis(0)));
+        world.showTitle(title);
+        List<Entity> enemies = player.getNearbyEntities(30, 0, 30);
+        for (Entity enemy : enemies) {
+          switch (enemy.getType()) {
+            case ZOMBIE, ZOMBIE_VILLAGER, SKELETON, SPIDER -> enemy.remove();
+          }
+        }
+        commandExecutorPlayer.setScore(0);
+        return;
+      }
+      world.spawnEntity(getEnemySpawnLocation(player, world), getEnemy());
+      commandExecutorPlayer.setGameTime(commandExecutorPlayer.getGameTime() - 5);
+    }, 0, 5 * 20);
   }
 
   /**
