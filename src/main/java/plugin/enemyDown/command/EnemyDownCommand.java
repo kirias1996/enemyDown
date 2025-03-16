@@ -3,10 +3,10 @@ package plugin.enemyDown.command;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.SplittableRandom;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.title.Title;
 import net.kyori.adventure.title.Title.Times;
 import org.bukkit.Bukkit;
@@ -34,8 +34,11 @@ import plugin.enemyDown.data.PlayerScore;
 public class EnemyDownCommand extends BaseCommand implements Listener {
 
   private List<PlayerScore> playerScoreList = new ArrayList<>();
+  private List<Entity> spawnEnemyList = new ArrayList<>();
+
   private Main main;
   private final int INITIAL_GAME_TIME = 20;
+  private final int INITIAL_SCORE = 0;
 
   public EnemyDownCommand(Main main) {
     this.main = main;
@@ -45,9 +48,9 @@ public class EnemyDownCommand extends BaseCommand implements Listener {
   public boolean onExecutePlayerCommand(Player player) {
     // コマンド実行プレイヤーを PlayerScoreとして格納する
     PlayerScore commandExecutorPlayer = getPlayerScore(player);
+    initializePlayerScore(commandExecutorPlayer);
 
-    commandExecutorPlayer.setGameTime(INITIAL_GAME_TIME);
-    initPlayerStatus(player);
+    initializePlayerStatus(player);
 
     gamePlay(player, commandExecutorPlayer, player.getWorld());
     return false;
@@ -89,22 +92,33 @@ public class EnemyDownCommand extends BaseCommand implements Listener {
     return playerScore;
   }
 
+  /**
+   * プレイヤースコア情報のスコアを0にクリア、ゲーム時間を設定する
+   *
+   * @param playerScore プレイヤースコア情報
+   */
+  private void initializePlayerScore(PlayerScore playerScore) {
+    playerScore.setScore(INITIAL_SCORE);
+    playerScore.setGameTime(INITIAL_GAME_TIME);
+  }
+
   @EventHandler
   public void enemyDeathEvent(EntityDeathEvent e) {
     LivingEntity enemy = e.getEntity();
     Player player = enemy.getKiller();
 
-    if (playerScoreList.isEmpty() || Objects.isNull(player)) {
+    if (playerScoreList.isEmpty() || spawnEnemyList.stream().noneMatch(p -> p.equals(enemy))) {
       return;
     }
 
-    for (PlayerScore playerScore : playerScoreList) {
-      if (playerScore.getPlayerName().equals(player.getName())) {
-        int enemyDestroyScore = getEnemyDestroyScore(enemy);
-        playerScore.setScore(playerScore.getScore() + enemyDestroyScore);
-        player.sendMessage("敵を倒しました。現在のスコアは" + playerScore.getScore() + "点です。");
-      }
-    }
+    playerScoreList.stream()
+        .filter(p -> p.getPlayerName().equals(player.getName()))
+        .findFirst()
+        .ifPresent(playerScore -> {
+          int enemyDestroyScore = getEnemyDestroyScore(enemy);
+          playerScore.setScore(playerScore.getScore() + enemyDestroyScore);
+          player.sendMessage("敵を倒しました。現在のスコアは" + playerScore.getScore() + "点です。");
+        });
   }
 
   /**
@@ -129,7 +143,7 @@ public class EnemyDownCommand extends BaseCommand implements Listener {
    *
    * @param player コマンドを実行したプレイヤー
    */
-  private void initPlayerStatus(Player player) {
+  private void initializePlayerStatus(Player player) {
     player.setHealth(20);
     player.setFoodLevel(20);
 
@@ -152,23 +166,37 @@ public class EnemyDownCommand extends BaseCommand implements Listener {
     Bukkit.getScheduler().runTaskTimer(main, Runnable -> {
       if (commandExecutorPlayer.getGameTime() <= 0) {
         Runnable.cancel();
-        Title title = Title.title(Component.text("ゲームが終了しました。"),
-            Component.text(commandExecutorPlayer.getPlayerName() + "の合計点数は" + commandExecutorPlayer.getScore() + "点!"),
+        Title title = Title.title(getGameEndTitle(), getGameEndSubTitle(commandExecutorPlayer),
             Times.times(Duration.ofMillis(0), Duration.ofMillis(3000), Duration.ofMillis(0)));
         world.showTitle(title);
-        List<Entity> enemies = player.getNearbyEntities(30, 0, 30);
-        for (Entity enemy : enemies) {
-          switch (enemy.getType()) {
-            case ZOMBIE, ZOMBIE_VILLAGER, SKELETON, SPIDER -> enemy.remove();
-          }
-        }
-        commandExecutorPlayer.setScore(0);
+        spawnEnemyList.forEach(Entity::remove);
+        spawnEnemyList = new ArrayList<>();
         return;
       }
-      world.spawnEntity(getEnemySpawnLocation(player, world), getEnemy());
+      spawnEnemyList.add(world.spawnEntity(getEnemySpawnLocation(player, world), getEnemy()));
       commandExecutorPlayer.setGameTime(commandExecutorPlayer.getGameTime() - 5);
     }, 0, 5 * 20);
   }
+
+  /**
+   * ゲーム終了時に表示するタイトルを取得する
+   *
+   * @return ゲーム終了メッセージ
+   */
+  private TextComponent getGameEndTitle() {
+    return Component.text("ゲームが終了しました。");
+  }
+
+  /**
+   * ゲーム終了時に取得した点数を表示するサブタイトル
+   *
+   * @param commandExecutorPlayer コマンド実行プレイヤー
+   * @return 合計スコアを表示するメッセージ
+   */
+  private TextComponent getGameEndSubTitle(PlayerScore commandExecutorPlayer) {
+    return Component.text(commandExecutorPlayer.getPlayerName() + "の合計点数は" + commandExecutorPlayer.getScore() + "点!");
+  }
+
 
   /**
    * 敵の出現エリアを取得します。 出現エリアはX軸とZ軸は自分の一からプラス,ランダムで-10~9の値が設定されます。 出現エリアはY軸はプレイヤーと同じ位置になります。

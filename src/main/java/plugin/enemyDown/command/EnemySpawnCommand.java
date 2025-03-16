@@ -10,7 +10,6 @@ import org.bukkit.event.Listener;
 
 public class EnemySpawnCommand extends BaseCommand implements Listener {
 
-
   @Override
   public boolean onExecutePlayerCommand(Player player) {
     player.getWorld().spawnEntity(getEnemySpawnLocation(player), getEnemy());
